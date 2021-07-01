@@ -1,8 +1,4 @@
 FROM ubuntu:20.04
-#
-#taken from https://www.codemag.com/article/1811021/Docker-for-Developers
-#ty
-#
 
 ARG TZ=America/Chicago
 ENV TIMEZONE=$TZ
