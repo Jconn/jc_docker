@@ -1,16 +1,19 @@
 version: "3.9"
 
 services: 
-  generic_dev:
-    image: jc_dev:dev 
+  esp32:
+    image: esp32:dev 
     stdin_open: true
     tty: true
     privileged: true
     network_mode: "host"
     hostname: 'docker-developer'
+    command: -c "source ~/projects/esp-idf/export.sh && /bin/zsh -l" 
     volumes:
+      - ~/.zsh_history:/home/dockerdev/.zsh_history
       - ~/.ssh:/home/dockerdev/.ssh
       - ~/.vim:/home/dockerdev/.vim
       - ~/.vimrc:/home/dockerdev/.vimrc
       - ~/.config/nvim:/home/dockerdev/.config/nvim
       - /dev:/dev
+      - /hdd/projects:/hdd/projects

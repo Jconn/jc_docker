@@ -1,0 +1,19 @@
+FROM jc_dev:dev
+#esp-idf prereqs
+RUN sudo apt-get install -y  git wget flex bison gperf python python3-pip python-setuptools cmake ninja-build ccache libffi-dev libssl-dev dfu-util
+RUN pip3 install pyserial
+RUN mkdir -p ~/projects/ && \
+    cd ~/projects && \
+    git clone -b v4.2 --recursive https://github.com/espressif/esp-idf.git
+
+RUN cd ~/projects/esp-idf && \
+    rm export.sh install.sh && \
+    wget https://raw.githubusercontent.com/espressif/esp-idf/master/export.sh && \
+    wget https://raw.githubusercontent.com/espressif/esp-idf/master/install.sh && \
+    cd tools/ && \
+    wget https://raw.githubusercontent.com/espressif/esp-idf/master/tools/detect_python.sh && \ 
+    cd .. && \
+    chmod +x export.sh install.sh && \
+    ./install.sh
+ENTRYPOINT [ "/bin/zsh" ]
+CMD ["-l"]
