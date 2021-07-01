@@ -1,0 +1,16 @@
+version: "3.9"
+
+services: 
+  generic_dev:
+    image: jc_dev:dev 
+    stdin_open: true
+    tty: true
+    privileged: true
+    network_mode: "host"
+    hostname: 'docker-developer'
+    volumes:
+      - ~/.ssh:/home/dockerdev/.ssh
+      - ~/.vim:/home/dockerdev/.vim
+      - ~/.vimrc:/home/dockerdev/.vimrc
+      - ~/.config/nvim:/home/dockerdev/.config/nvim
+      - /dev:/dev
