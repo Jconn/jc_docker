@@ -1,6 +1,8 @@
 FROM jc_dev:dev
+ARG USERNAME=dockerdev
 #esp-idf prereqs
 RUN sudo apt-get install -y  git wget flex bison gperf python python3-pip python-setuptools cmake ninja-build ccache libffi-dev libssl-dev dfu-util
+RUN sudo adduser $USERNAME dialout
 RUN pip3 install pyserial
 RUN mkdir -p ~/projects/ && \
     cd ~/projects && \
