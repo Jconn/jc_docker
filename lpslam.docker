@@ -269,9 +269,9 @@ RUN cd src && \
     git clone https://github.com/lp-research/lpslam_node --recurse-submodules && \ 
     git clone https://github.com/lp-research/lpslam_interfaces
 
-RUN apt-get update 
+RUN apt-get update && apt install libtbb2 
 # install conan for openvslam and lpslam depencies
-RUN pip install conan libtbb2
+RUN pip install conan 
 #for some reason must manually use this conan package
 #
 RUN cd /opt/slam_ws/src/lpslam_node/lpslam/conan-packages && ./install_all.sh
@@ -282,7 +282,9 @@ ARG ROS_DISTRO=galactic
 
 RUN . /opt/ros/$ROS_DISTRO/setup.sh && \ 
     colcon build --symlink-install \
-    --cmake-args -DUSE_PANGOLIN_VIEWER=ON -DUSE_SOCKET_PUBLISHER=OFF \
+    --cmake-args -DUSE_PANGOLIN_VIEWER=ON \
+    -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+    -DUSE_SOCKET_PUBLISHER=OFF \
     -DBUILD_WITH_MARCH_NATIVE=OFF 
 
 
