@@ -257,6 +257,7 @@ RUN set -x && \
     -DBUILD_TESTS=ON \
     -DINSTALL_PANGOLIN_VIEWER=ON \
     -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
     .. && \
   make -j${NUM_THREADS} && \
   make install && \
