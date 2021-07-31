@@ -1,0 +1,74 @@
+FROM openvslam:dev
+
+ARG TZ=America/Chicago
+ENV TIMEZONE=$TZ
+RUN ln -snf /usr/share/zoneinfo/$TIMEZONE /etc/localtime && echo $TIMEZONE > /etc/timezone
+
+RUN apt-get update
+RUN apt-get update && apt-get install --no-install-recommends -y \
+    python3                       \
+    python3-pip                   \
+    python3-dev
+RUN apt-get install -y clangd-11
+
+#neovim dependencies
+RUN pip3 install neovim
+RUN apt-get install -y git ninja-build gettext libtool libtool-bin autoconf automake cmake g++ pkg-config unzip
+
+#build neovim
+RUN mkdir /opt/tools/ 
+RUN cd /opt/tools/ \
+    && git clone https://github.com/neovim/neovim 
+
+RUN cd /opt/tools/neovim \
+    && make CMAKE_BUILD_TYPE=RelWithDebInfo \
+    && make install
+
+#oh-my-zsh
+RUN apt-get install -y zsh 
+#add users
+ARG USERNAME=dockerdev
+ARG USER_UID=1000
+ARG USER_GID=$USER_UID
+RUN groupadd --gid $USER_GID $USERNAME \
+    && useradd -s /bin/bash --uid $USER_UID --gid $USER_GID -m $USERNAME \
+    && apt-get update \
+    && apt-get install -y sudo wget \
+    && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
+    && chmod 0440 /etc/sudoers.d/$USERNAME \
+    #
+    # Clean up
+    && apt-get autoremove -y \
+    && apt-get clean -y \
+    && rm -rf /var/lib/apt/lists/*
+
+
+USER $USERNAME
+
+RUN cd /tmp/ && wget https://github.com/deluan/zsh-in-docker/releases/download/v1.1.1/zsh-in-docker.sh && chmod +x zsh-in-docker.sh 
+
+RUN /tmp/zsh-in-docker.sh \
+    -t https://github.com/denysdovhan/spaceship-prompt \
+    -a 'SPACESHIP_PROMPT_ADD_NEWLINE="false"' \
+    -a 'SPACESHIP_PROMPT_SEPARATE_LINE="false"' \
+    -p git \
+    -p https://github.com/zsh-users/zsh-autosuggestions \
+    -p https://github.com/zsh-users/zsh-completions \
+    -p https://github.com/zsh-users/zsh-history-substring-search \
+    -p https://github.com/zsh-users/zsh-syntax-highlighting \
+    -p 'history-substring-search' 
+
+WORKDIR /opt/slam_ws
+ARG USERNAME=dockerdev
+RUN sudo chown -R dockerdev:dockerdev /opt/openvslam
+RUN sudo chown -R dockerdev:dockerdev /opt/slam_ws
+RUN cd src/openvslam_ros/ && curl -sL "https://github.com/OpenVSLAM-Community/FBoW_orb_vocab/raw/main/orb_vocab.fbow" -o orb_vocab.fbow
+#this let's clangd follow definitions correctly, because the packages in use are built as root 
+RUN sudo chmod 777 /root 
+RUN sudo apt-get install ros-galactic-cyclonedds
+RUN touch ~/.zshenv
+RUN echo 'source /opt/ros/galactic/setup.zsh' >> ~/.zshenv
+RUN echo 'source /opt/slam_ws/install/setup.zsh' >> ~/.zshenv
+RUN echo 'export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp' >> ~/.zshenv
+ENTRYPOINT [ "/bin/zsh" ]
+CMD ["-l"]

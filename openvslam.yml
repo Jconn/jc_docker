@@ -1,0 +1,28 @@
+version: "3.9"
+
+services: 
+  openvslam:
+    image: jc_openvslam:dev 
+    stdin_open: true
+    tty: true
+    privileged: true
+    network_mode: "host"
+    hostname: 'docker-developer'
+    command: -c "/bin/zsh -l" 
+    deploy:
+      resources:
+        reservations:
+          devices:
+          - driver: 'nvidia'
+            count: 1
+            capabilities: [gpu]
+    environment:
+      - DISPLAY=$DISPLAY
+    volumes:
+      - ~/.zsh_history:/home/dockerdev/.zsh_history
+      - ~/.ssh:/home/dockerdev/.ssh
+      - ~/.vim:/home/dockerdev/.vim
+      - ~/.vimrc:/home/dockerdev/.vimrc
+      - ~/.config/nvim:/home/dockerdev/.config/nvim
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - $XAUTHORITY:/root/.Xauthority
